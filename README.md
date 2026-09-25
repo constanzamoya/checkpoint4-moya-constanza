@@ -125,3 +125,7 @@ Cada nodo se validó con *Execute step* antes de exportar.
 ## Limitaciones conocidas
 
 El Gmail Trigger funciona por polling cada minuto, por lo que la latencia de respuesta es de hasta un minuto más el tiempo de procesamiento. El corte del historial citado reconoce los formatos de Gmail en español e inglés y el separador clásico de Outlook; otros clientes de correo pueden dejar pasar parte del historial, que igual queda truncado a 2000 caracteres. Si Slack falla, el nodo continúa para no perder la escritura de memoria; el borrador en Gmail, que es el control crítico, ya está creado en ese punto.
+
+## Evidencia de funcionamiento
+
+Las capturas de autenticación OAuth2, pruebas de regresión y borrador HITL están en Evidencias_CP4_MoyaConstanza.pdf
