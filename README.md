@@ -1,6 +1,6 @@
 # Checkpoint 4 — Integraciones avanzadas e interconexión de sistemas
 
-**Copiloto de Estado de Proyectos** · Equipo Digital Garces Fruit
+**Copiloto de Estado de Proyectos** 
 Constanza Moya · AI Automation Avanzado · Coderhouse
 
 Evolución del proyecto integrador. Parte del workflow del Módulo 3 (arquitectura Manager-Worker con memoria persistente en Airtable) y lo conecta con tres herramientas externas vía OAuth2: **Gmail** como casilla de soporte, **HubSpot** como CRM de solicitantes y **Slack** como canal del equipo.
