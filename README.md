@@ -17,7 +17,7 @@ Para ejecutar el flujo completo en otra instancia, importar primero los dos work
 
 ## Caso de negocio
 
-Los keyusers de Garces Fruit escriben a la casilla del Equipo Digital preguntando por el estado de sus proyectos. El agente clasifica el correo, consulta las planillas, redacta la respuesta y la deja como **borrador en el mismo hilo** para que una persona del equipo la revise antes de enviarla. En paralelo registra al solicitante en el CRM y avisa al canal de Slack que hay un borrador esperando aprobación.
+Los keyusers escriben a la casilla del Equipo Digital preguntando por el estado de sus proyectos. El agente clasifica el correo, consulta las planillas, redacta la respuesta y la deja como **borrador en el mismo hilo** para que una persona del equipo la revise antes de enviarla. En paralelo registra al solicitante en el CRM y avisa al canal de Slack que hay un borrador esperando aprobación.
 
 ## Flujo
 
