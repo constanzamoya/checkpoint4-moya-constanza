@@ -1,0 +1,137 @@
+{
+  "name": "worker2_redactor_moya_constanza",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "fce07180-bffb-4661-9583-f2fa4d7fa648",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Proyecto: {{ $json.proyecto }}\nPregunta original del keyuser: {{ $json.pregunta_original }}\n\nAnalisis a comunicar:\n{{ $json.analisis }}\n\nRedacta la respuesta final para el keyuser.",
+        "options": {
+          "systemMessage": "Sos el Redactor de Respuestas del Copiloto de Proyectos del Equipo Digital de Garces Fruit. Convertis el analisis tecnico que te pasan en un mensaje claro y breve de negocio para el keyuser. No agregas datos que no esten en el analisis. Conserva al inicio la etiqueta de decision en MAYUSCULAS (RESPONDIDO o FALTA UN DATO) tal como venga en el analisis. Se conciso y profesional.\nSi la pregunta original del keyuser expresa confusion o pide una reformulacion,\nvolve a explicar lo mismo en lenguaje mas simple: frases cortas, sin porcentajes\nencadenados, una idea por parrafo, y cerra con la conclusion practica en una linea."
+        }
+      },
+      "id": "4cfc9f66-9411-4a13-a718-91fc41052258",
+      "name": "Redactor de Respuesta",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        352,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-sonnet-4-5-20250929",
+          "mode": "list",
+          "cachedResultName": "Claude Sonnet 4.5"
+        },
+        "options": {}
+      },
+      "id": "b2e3afb6-cf04-47d8-943e-c8d434647c7c",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.5,
+      "position": [
+        240,
+        224
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "dIKE8OrZIKAubgaI",
+          "name": "Anthropic account Coni"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b1",
+              "name": "status",
+              "value": "success",
+              "type": "string"
+            },
+            {
+              "id": "b2",
+              "name": "mensaje_final",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4d0a2aab-dbb3-4b1b-a4be-0f6c14b8963c",
+      "name": "Contrato de Salida",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        704,
+        0
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "Redactor de Respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Redactor de Respuesta",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redactor de Respuesta": {
+      "main": [
+        [
+          {
+            "node": "Contrato de Salida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "c8c01b75-803b-4611-8a6f-54197ae7acb1",
+  "meta": {
+    "instanceId": "e4adfb8248a637bb52a45eab840dc805cd709e062fef9162bbbf2332707fb046"
+  },
+  "nodeGroups": [],
+  "id": "yT0XxKFd2Bui0eoU",
+  "tags": []
+}

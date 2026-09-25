@@ -1,0 +1,236 @@
+{
+  "name": "worker1_analista_estado_moya_constanza",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "c70fc34d-6c3f-494b-a936-6083dd9f2a5e",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Consulta del keyuser: {{ $json.pregunta || $json.proyecto }}\n\nDeduci el proyecto, consulta las planillas y devolve el analisis y, si hay atraso, su justificacion.",
+        "options": {
+          "systemMessage": "## ROL\nSos el Analista de Estado, un worker especialista del Copiloto de Proyectos del Equipo Digital de Garces Fruit. Recibis el nombre de un proyecto y devolves un analisis de su estado basado EXCLUSIVAMENTE en las planillas, usando tus herramientas. No redactas el correo final para el keyuser (de eso se encarga otro worker): entregas los hechos.\n\n## PROCEDIMIENTO (en orden, frena en el primero que aplique)\n1. Consulta SIEMPRE consultar_estado_de_proyectos con el nombre del proyecto recibido. Si no devuelve ninguna fila, empeza tu respuesta con \"FALTA UN DATO\" y pedi que se precise el nombre. No inventes.\n2. Con la fila, lee Estado, Avance_pct, Horas_estimadas, Horas_consumidas, Responsable y Motivo_atraso.\n3. Si hay indicios de atraso (avance bajo para el tiempo transcurrido, u horas consumidas cerca o por encima de las estimadas) o si Motivo_atraso lo indica: usa Motivo_atraso tal cual si explica la causa, y consulta consultar_capacidad con el Responsable. Si Horas_comprometidas_semana supera la Capacidad_semanal_h, la causa es SOBREASIGNACION: explicala con los numeros exactos (ej: comprometido en 58 h/semana contra una capacidad de 42). Es un problema de CARGA del equipo, nunca un juicio sobre la persona.\n4. Empeza tu respuesta con \"RESPONDIDO\" y entrega: proyecto, estado, % de avance y, si corresponde, la justificacion del atraso con los datos leidos.\n\n## LIMITES\nNo entregues sueldos, datos personales ni evaluaciones de desempeno. No comprometas fechas ni recursos.",
+          "maxIterations": 8
+        }
+      },
+      "id": "1e89b262-17ae-4c36-92cc-7f253d312d25",
+      "name": "Analista de Estado",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        352,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-sonnet-4-5-20250929",
+          "mode": "list",
+          "cachedResultName": "Claude Sonnet 4.5"
+        },
+        "options": {}
+      },
+      "id": "195fade5-08b3-4b3f-a9f3-3d110da87767",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.5,
+      "position": [
+        208,
+        224
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "dIKE8OrZIKAubgaI",
+          "name": "Anthropic account Coni"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Tablero de proyectos del Equipo Digital de Garces Fruit. Para un proyecto devuelve su estado (En curso, En pausa, Bloqueado o Cerrado), el porcentaje de avance, las fechas de inicio y fin estimada, las horas estimadas y consumidas, el responsable y el motivo de atraso si lo hay. USALA SIEMPRE antes de responder por el estado o el avance de un proyecto: es la unica fuente valida y no podes afirmar nada sobre un proyecto que no hayas leido aca. El parametro 'proyecto' es el nombre del proyecto; deducilo del texto aunque lo mencione de forma parcial o informal. Si no devuelve ninguna fila, no inventes: pedi que precise el nombre. NO la uses para sueldos, datos personales ni evaluaciones de desempeno.",
+        "documentId": {
+          "__rl": true,
+          "value": "1jmG_iXJHCA-lVuRGafFh-ssbR6JwM3EmTWnkTb5mbPs",
+          "mode": "list",
+          "cachedResultName": "Estado de proyectos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jmG_iXJHCA-lVuRGafFh-ssbR6JwM3EmTWnkTb5mbPs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1175112778,
+          "mode": "list",
+          "cachedResultName": "Proyectos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jmG_iXJHCA-lVuRGafFh-ssbR6JwM3EmTWnkTb5mbPs/edit#gid=1175112778"
+        },
+        "options": {}
+      },
+      "id": "41989458-9c4d-4b92-8401-3e451603bab6",
+      "name": "consultar_estado_de_proyectos",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        384,
+        224
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "xGLGC3dfpHjeXHnr",
+          "name": "Google Sheets Constanza"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Planilla de asignaciones y capacidad del Equipo Digital de Garces Fruit. Para una persona devuelve su capacidad semanal en horas (42 en Chile), los proyectos en los que esta asignada y las horas comprometidas por semana. USALA DESPUES de consultar_estado_de_proyectos cuando haya indicios de atraso, para justificarlo con datos: si las horas comprometidas superan la capacidad, la causa es sobreasignacion. El parametro 'persona' es el nombre del responsable que obtuviste del tablero. Presenta el resultado como un problema de carga del equipo, nunca como un juicio sobre el rendimiento de la persona. NO la uses para sueldos ni datos sensibles.",
+        "documentId": {
+          "__rl": true,
+          "value": "1jmG_iXJHCA-lVuRGafFh-ssbR6JwM3EmTWnkTb5mbPs",
+          "mode": "list",
+          "cachedResultName": "Estado de proyectos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jmG_iXJHCA-lVuRGafFh-ssbR6JwM3EmTWnkTb5mbPs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1612536108,
+          "mode": "list",
+          "cachedResultName": "Asignaciones",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jmG_iXJHCA-lVuRGafFh-ssbR6JwM3EmTWnkTb5mbPs/edit#gid=1612536108"
+        },
+        "options": {}
+      },
+      "id": "b5217f2a-8521-4f65-b21e-d5f60304aa9e",
+      "name": "consultar_capacidad",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        560,
+        224
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "xGLGC3dfpHjeXHnr",
+          "name": "Google Sheets Constanza"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "status",
+              "value": "success",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "pregunta",
+              "value": "={{ $('Execute Workflow Trigger').item.json.pregunta || $('Execute Workflow Trigger').item.json.proyecto }}",
+              "type": "string"
+            },
+            {
+              "id": "a3",
+              "name": "analisis",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "76039542-9873-4240-ac00-b66856369762",
+      "name": "Contrato de Salida",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        704,
+        0
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "Analista de Estado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Analista de Estado",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "consultar_estado_de_proyectos": {
+      "ai_tool": [
+        [
+          {
+            "node": "Analista de Estado",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "consultar_capacidad": {
+      "ai_tool": [
+        [
+          {
+            "node": "Analista de Estado",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analista de Estado": {
+      "main": [
+        [
+          {
+            "node": "Contrato de Salida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "b24693ee-336f-46e6-bfef-e6bf92018d07",
+  "meta": {
+    "instanceId": "e4adfb8248a637bb52a45eab840dc805cd709e062fef9162bbbf2332707fb046"
+  },
+  "nodeGroups": [],
+  "id": "IP03V8kykGloai0L",
+  "tags": []
+}
